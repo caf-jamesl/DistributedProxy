@@ -8,7 +8,7 @@ namespace DistributedProxy.Console
         private static void Main()
         {
             var listener = new HttpListener();
-            listener.Prefixes.Add("http://*:7777/");
+            listener.Prefixes.Add("http://+:7777/");
             listener.Start();
             System.Console.WriteLine("Listening...");
             while (listener.IsListening)

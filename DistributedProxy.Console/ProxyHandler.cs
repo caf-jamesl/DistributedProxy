@@ -1,11 +1,12 @@
 ﻿using System;
+using System.IO;
 using System.Net;
-using System.Threading;
+using System.Text;
 using DistributedProxy.Console.Model;
 
 namespace DistributedProxy.Console
 {
-    class ProxyHandler
+    internal class ProxyHandler
     {
         private HttpListenerContext Context { get; }
 
@@ -16,29 +17,46 @@ namespace DistributedProxy.Console
 
         public void HandleRequest()
         {
-            
-            //Check caching local
-            //Check caching list
-            //Submit request
-            var myHttpWebRequest = (HttpWebRequest)WebRequest.Create(Context.Request.RawUrl);
-            myHttpWebRequest.KeepAlive = false;
-            myHttpWebRequest.Proxy.Credentials = CredentialCache.DefaultCredentials;
-            myHttpWebRequest.UserAgent = Context.Request.UserAgent;
-            var myRequestState = new RequestState(myHttpWebRequest, Context);
-            myHttpWebRequest.BeginGetResponse(new AsyncCallback(Response), myRequestState);
-            Thread.Sleep(10000);
+            var webRequest = (HttpWebRequest)WebRequest.Create(Context.Request.RawUrl);
+            System.Console.WriteLine(Context.Request.RawUrl);
+            webRequest.KeepAlive = false;
+            webRequest.Proxy.Credentials = CredentialCache.DefaultCredentials;
+            webRequest.UserAgent = Context.Request.UserAgent;
+            webRequest.Proxy = new WebProxy();
+            var myRequestState = new RequestState(webRequest, Context);
+            webRequest.BeginGetResponse(Response, myRequestState);
         }
 
         private static void Response(IAsyncResult asynchronousResult)
         {
-            System.Console.WriteLine("a");
-            var requestData = (RequestState)asynchronousResult.AsyncState;
-            using (var responseFromWebSiteBeingRelayed = (HttpWebResponse)requestData.Request.EndGetResponse(asynchronousResult))
+            try
             {
-                using (var stream = responseFromWebSiteBeingRelayed.GetResponseStream())
-                {        
-                    stream.Close();
+                var requestData = (RequestState)asynchronousResult.AsyncState;
+                using (var httpWebResponse = (HttpWebResponse)requestData.Request.EndGetResponse(asynchronousResult))
+                {
+                    using (var responseStream = httpWebResponse.GetResponseStream())
+                    {
+                        var originalResponse = requestData.Context.Response;
+
+                        if (httpWebResponse.ContentType.Contains("text/html"))
+                        {
+                            var reader = new StreamReader(responseStream);
+                            var html = reader.ReadToEnd();
+                            var byteArray = Encoding.Default.GetBytes(html);
+                            var stream = new MemoryStream(byteArray);
+                            stream.CopyTo(originalResponse.OutputStream);
+                        }
+                        else
+                        {
+                            responseStream.CopyTo(originalResponse.OutputStream);
+                        }
+                        originalResponse.OutputStream.Close();
+                    }
                 }
+            }
+            catch
+            {
+                // ignored
             }
         }
     }
