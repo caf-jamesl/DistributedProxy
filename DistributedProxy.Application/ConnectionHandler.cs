@@ -58,7 +58,6 @@ namespace DistributedProxy.Application
             try
             {
                 UdpSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.Broadcast, 1);
-               // UdpSocket.Blocking = false;
                 UdpSocket.Bind(UdpEndPoint);
             }
             catch (SocketException)
@@ -74,6 +73,7 @@ namespace DistributedProxy.Application
                 var message = new Message { Type = MessageType.NewHost, Content = GetLocalIpAddress() };
                 var bytes = SerializationHelper.ObjectToByteArray(message);
                 UdpSocket.SendTo(bytes, endPoint);
+                DoAzureHack();
             }
             catch (SocketException)
             {
@@ -102,6 +102,22 @@ namespace DistributedProxy.Application
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
+            }
+        }
+
+        private static void DoAzureHack()
+        {
+            try
+            {
+                var endPoint = new IPEndPoint(IPAddress.Parse("10.0.0.4"), UdpPortNumber);
+                var message = new Message { Type = MessageType.NewHost, Content = GetLocalIpAddress() };
+                var bytes = SerializationHelper.ObjectToByteArray(message);
+                UdpSocket.SendTo(bytes, endPoint);
+                endPoint = new IPEndPoint(IPAddress.Parse("10.0.0.5"), UdpPortNumber);
+                UdpSocket.SendTo(bytes, endPoint);
+            }
+            catch (SocketException)
+            {
             }
         }
 
