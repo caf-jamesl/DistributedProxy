@@ -1,4 +1,4 @@
-﻿ using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -13,12 +13,12 @@ namespace DistributedProxy.Application
     {
         public static bool IsCheckingForNewHosts { get; set; }
         private static Socket ListenSocket { get; set; }
-        private static Socket SendSocket { get; set; }
+        private static Socket UdpSocket { get; set; }
         private static IPEndPoint IpTcpEndPoint { get; set; }
-        private readonly List<Client> _connections = new List<Client>();
+        private static readonly List<Client> Connections = new List<Client>();
         private const int PortNumber = 8044;
 
-        internal void CheckForNewHosts()
+        internal void AcceptNewHosts()
         {
             while (IsCheckingForNewHosts)
             {
@@ -33,7 +33,7 @@ namespace DistributedProxy.Application
                             ClientSocket = clientSocket,
                             InUse = true
                         };
-                        _connections.Add(client);
+                        Connections.Add(client);
                         // Let new client know current people in room
                     }
                     catch (Exception)
@@ -44,14 +44,55 @@ namespace DistributedProxy.Application
             }
         }
 
+        internal void CheckForNewHostsSignal()
+        {
+            while (IsCheckingForNewHosts)
+            {
+                EndPoint localEndPoint = IpTcpEndPoint;
+                var receiveBuffer = new byte[1024];
+                var receiveByteCount = UdpSocket.ReceiveFrom(receiveBuffer, ref localEndPoint);
+                if (0 >= receiveByteCount) continue;
+                var message = (Message)SerializationHelper.ByteArrayToObject(receiveBuffer);
+                DealWithMessage(message);
+            }
+        }
+
+        private static void DealWithMessage(Message message)
+        {
+            switch (message.Type)
+            {
+                case MessageType.NewHost:
+                    TcpConnect(message.Content);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
+        private static void TcpConnect(string iP)
+        {
+            var destinationIp = IPAddress.Parse(iP);
+            var endPoint = new IPEndPoint(destinationIp, PortNumber);
+            var client = new Client
+            {
+                ClientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp)
+                {
+                    Blocking = false
+                },
+                InUse = true
+            };
+            client.ClientSocket.Connect(endPoint);
+            Connections.Add(client);
+        }
+
         internal void SendNewHostSignal()
         {
             try
             {
                 var endPoint = new IPEndPoint(IPAddress.Broadcast, PortNumber);
-                var message = new Message { Type = MessageType.NewHost, Content = GetLocalIpAddress() };
+                var message = new Message {Type = MessageType.NewHost, Content = GetLocalIpAddress()};
                 var bytes = SerializationHelper.ObjectToByteArray(message);
-                SendSocket.SendTo(bytes, endPoint);
+                UdpSocket.SendTo(bytes, endPoint);
             }
             catch (SocketException)
             {
@@ -85,8 +126,8 @@ namespace DistributedProxy.Application
         {
             try
             {
-                SendSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-                SendSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.Broadcast, 1);
+                UdpSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+                UdpSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.Broadcast, 1);
             }
             catch (SocketException)
             {

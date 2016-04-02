@@ -18,7 +18,7 @@ namespace DistributedProxy.Application
 
             if (NewHostThread == null)
             {
-                NewHostThread = new Thread(new ConnectionHandler().CheckForNewHosts);
+                NewHostThread = new Thread(new ConnectionHandler().AcceptNewHosts);
             }
         }
         public void StartRequestThread()
