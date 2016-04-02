@@ -58,7 +58,7 @@ namespace DistributedProxy.Application
             try
             {
                 UdpSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.Broadcast, 1);
-                UdpSocket.Blocking = false;
+               // UdpSocket.Blocking = false;
                 UdpSocket.Bind(UdpEndPoint);
             }
             catch (SocketException)
@@ -107,6 +107,10 @@ namespace DistributedProxy.Application
 
         private static void TcpConnect(string iP)
         {
+            if (iP == GetLocalIpAddress())
+            {
+                return;
+            }
             var destinationIp = IPAddress.Parse(iP);
             var endPoint = new IPEndPoint(destinationIp, TcpPortNumber);
             var client = new Client
