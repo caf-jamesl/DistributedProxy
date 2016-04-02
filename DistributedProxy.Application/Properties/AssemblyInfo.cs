@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("DistributedProxy.Console.Test")]
+[assembly: AssemblyTitle("DistributedProxy.Application")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("DistributedProxy.Console.Test")]
+[assembly: AssemblyProduct("DistributedProxy.Application")]
 [assembly: AssemblyCopyright("Copyright ©  2016")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("6d5a6ab1-ae42-4e0f-978a-9b33e916cb90")]
+[assembly: Guid("78ca0aaa-6689-4c1f-8b04-729fafeabfb8")]
 
 // Version information for an assembly consists of the following four values:
 //
@@ -34,3 +34,6 @@ using System.Runtime.InteropServices;
 // [assembly: AssemblyVersion("1.0.*")]
 [assembly: AssemblyVersion("1.0.0.0")]
 [assembly: AssemblyFileVersion("1.0.0.0")]
+[assembly: InternalsVisibleTo("DistributedProxy.Application.Test")]
+[assembly: InternalsVisibleTo("DistributedProxy.Application.Explorables")]
+
