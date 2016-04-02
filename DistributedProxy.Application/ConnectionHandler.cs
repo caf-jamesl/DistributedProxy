@@ -86,10 +86,17 @@ namespace DistributedProxy.Application
             {
                 EndPoint localEndPoint = UdpEndPoint;
                 var receiveBuffer = new byte[1024];
-                var receiveByteCount = UdpSocket.ReceiveFrom(receiveBuffer, ref localEndPoint);
-                if (0 >= receiveByteCount) continue;
-                var message = (Message)SerializationHelper.ByteArrayToObject(receiveBuffer);
-                DealWithMessage(message);
+                try
+                {
+                    var receiveByteCount = UdpSocket.ReceiveFrom(receiveBuffer, ref localEndPoint);
+                    if (0 >= receiveByteCount) continue;
+                    var message = (Message)SerializationHelper.ByteArrayToObject(receiveBuffer);
+                    DealWithMessage(message);
+                }
+                catch
+                {
+                    // ignored
+                }
             }
         }
 
@@ -112,11 +119,11 @@ namespace DistributedProxy.Application
                 IPAddress ip = null;
                 if (GetLocalIpAddress() == "10.0.0.4")
                 {
-                     ip = IPAddress.Parse("10.0.0.5");
+                    ip = IPAddress.Parse("10.0.0.5");
                 }
                 if (GetLocalIpAddress() == "10.0.0.5")
                 {
-                     ip = IPAddress.Parse("10.0.0.4");
+                    ip = IPAddress.Parse("10.0.0.4");
                 }
                 if (ip == null)
                 {
@@ -142,14 +149,18 @@ namespace DistributedProxy.Application
             var endPoint = new IPEndPoint(destinationIp, TcpPortNumber);
             var client = new Client
             {
-                ClientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp)
-                {
-                    Blocking = false
-                },
+                ClientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp),
                 InUse = true
             };
-            client.ClientSocket.Connect(endPoint);
-            Connections.Add(client);
+            try
+            {
+                client.ClientSocket.Connect(endPoint);
+                Connections.Add(client);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
         }
 
         private static string GetLocalIpAddress()
