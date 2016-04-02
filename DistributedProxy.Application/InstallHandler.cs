@@ -4,7 +4,7 @@ using Microsoft.Win32;
 using System.IO;
 using System.Configuration;
 using System.Xml.Linq;
-// ReSharper disable NotAccessedField.Local
+
 
 namespace DistributedProxy.Application
 {
@@ -14,7 +14,6 @@ namespace DistributedProxy.Application
         public static extern bool InternetSetOption(IntPtr hInternet, int dwOption, IntPtr lpBuffer, int dwBufferLength);
         public const int INTERNET_OPTION_SETTINGS_CHANGED = 39;
         public const int INTERNET_OPTION_REFRESH = 37;
-        private static bool settingsReturn, refreshReturn;
 
         public void Install()
         {
@@ -27,8 +26,8 @@ namespace DistributedProxy.Application
             if (registry == null) return;
             registry.SetValue("ProxyEnable", 1);
             registry.SetValue("ProxyServer", "127.0.0.1:7777");
-            settingsReturn = InternetSetOption(IntPtr.Zero, INTERNET_OPTION_SETTINGS_CHANGED, IntPtr.Zero, 0);
-            refreshReturn = InternetSetOption(IntPtr.Zero, INTERNET_OPTION_REFRESH, IntPtr.Zero, 0);
+            InternetSetOption(IntPtr.Zero, INTERNET_OPTION_SETTINGS_CHANGED, IntPtr.Zero, 0);
+            InternetSetOption(IntPtr.Zero, INTERNET_OPTION_REFRESH, IntPtr.Zero, 0);
             registry.Close();
         }
 
@@ -38,8 +37,8 @@ namespace DistributedProxy.Application
             if (registry == null) return;
             registry.SetValue("ProxyEnable", 0);
             registry.SetValue("ProxyServer", "127.0.0.1:7777");
-            settingsReturn = InternetSetOption(IntPtr.Zero, INTERNET_OPTION_SETTINGS_CHANGED, IntPtr.Zero, 0);
-            refreshReturn = InternetSetOption(IntPtr.Zero, INTERNET_OPTION_REFRESH, IntPtr.Zero, 0);
+            InternetSetOption(IntPtr.Zero, INTERNET_OPTION_SETTINGS_CHANGED, IntPtr.Zero, 0);
+            InternetSetOption(IntPtr.Zero, INTERNET_OPTION_REFRESH, IntPtr.Zero, 0);
             registry.Close();
         }
     }
