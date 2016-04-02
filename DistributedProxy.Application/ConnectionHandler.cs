@@ -109,11 +109,22 @@ namespace DistributedProxy.Application
         {
             try
             {
-                var endPoint = new IPEndPoint(IPAddress.Parse("10.0.0.4"), UdpPortNumber);
+                IPAddress ip = null;
+                if (GetLocalIpAddress() == "10.0.0.4")
+                {
+                     ip = IPAddress.Parse("10.0.0.5");
+                }
+                if (GetLocalIpAddress() == "10.0.0.5")
+                {
+                     ip = IPAddress.Parse("10.0.0.4");
+                }
+                if (ip == null)
+                {
+                    return;
+                }
+                var endPoint = new IPEndPoint(ip, UdpPortNumber);
                 var message = new Message { Type = MessageType.NewHost, Content = GetLocalIpAddress() };
                 var bytes = SerializationHelper.ObjectToByteArray(message);
-                UdpSocket.SendTo(bytes, endPoint);
-                endPoint = new IPEndPoint(IPAddress.Parse("10.0.0.5"), UdpPortNumber);
                 UdpSocket.SendTo(bytes, endPoint);
             }
             catch (SocketException)
