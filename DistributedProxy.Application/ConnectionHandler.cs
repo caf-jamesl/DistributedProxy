@@ -13,32 +13,70 @@ namespace DistributedProxy.Application
     internal class ConnectionHandler
     {
         public static bool IsCheckingForNewHosts { get; set; }
-        private static Socket ListenSocket { get; set; }
-        private static Socket UdpSocket { get; set; }
-        private static IPEndPoint IpTcpEndPoint { get; set; }
+        private const int TcpPortNumber = 8044;
+        private const int UdpPortNumber = 8045;
+        private static readonly Socket TcpSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp)
+        {
+            Blocking = false
+        };
+        private static readonly Socket UdpSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+        private static readonly IPEndPoint IpTcpEndPoint = new IPEndPoint(IPAddress.Any, TcpPortNumber);
+        private static readonly IPEndPoint UdpEndPoint = new IPEndPoint(IPAddress.Any, UdpPortNumber);
         private static readonly List<Client> Connections = new List<Client>();
-        private const int PortNumber = 8044;
 
         internal void AcceptNewHosts()
         {
             new Task(CheckForNewHostsSignal, TaskCreationOptions.LongRunning).Start();
             while (IsCheckingForNewHosts)
             {
-                    try
+                try
+                {
+                    var clientSocket = TcpSocket.Accept();
+                    clientSocket.Blocking = false;
+                    var client = new Client
                     {
-                        var clientSocket = ListenSocket.Accept();
-                        clientSocket.Blocking = false;
-                        var client = new Client
-                        {
-                            ClientSocket = clientSocket,
-                            InUse = true
-                        };
-                        Connections.Add(client);
-                    }
-                    catch (Exception)
-                    {
-                        // ignored
-                    }
+                        ClientSocket = clientSocket,
+                        InUse = true
+                    };
+                    Connections.Add(client);
+                }
+                catch (Exception)
+                {
+                    // ignored
+                }
+            }
+        }
+
+        internal void SetupTcp()
+        {
+            TcpSocket.Bind(IpTcpEndPoint);
+            TcpSocket.Listen(10);
+        }
+
+        internal void SetupUdp()
+        {
+            try
+            {
+                UdpSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.Broadcast, 1);
+                UdpSocket.Blocking = false;
+                UdpSocket.Bind(UdpEndPoint);
+            }
+            catch (SocketException)
+            {
+            }
+        }
+
+        internal void SendNewHostSignal()
+        {
+            try
+            {
+                var endPoint = new IPEndPoint(IPAddress.Broadcast, UdpPortNumber);
+                var message = new Message { Type = MessageType.NewHost, Content = GetLocalIpAddress() };
+                var bytes = SerializationHelper.ObjectToByteArray(message);
+                UdpSocket.SendTo(bytes, endPoint);
+            }
+            catch (SocketException)
+            {
             }
         }
 
@@ -46,11 +84,11 @@ namespace DistributedProxy.Application
         {
             while (IsCheckingForNewHosts)
             {
-                EndPoint localEndPoint = IpTcpEndPoint;
+                EndPoint localEndPoint = UdpEndPoint;
                 var receiveBuffer = new byte[1024];
                 var receiveByteCount = UdpSocket.ReceiveFrom(receiveBuffer, ref localEndPoint);
                 if (0 >= receiveByteCount) continue;
-                var message = (Message) SerializationHelper.ByteArrayToObject(receiveBuffer);
+                var message = (Message)SerializationHelper.ByteArrayToObject(receiveBuffer);
                 DealWithMessage(message);
             }
         }
@@ -70,7 +108,7 @@ namespace DistributedProxy.Application
         private static void TcpConnect(string iP)
         {
             var destinationIp = IPAddress.Parse(iP);
-            var endPoint = new IPEndPoint(destinationIp, PortNumber);
+            var endPoint = new IPEndPoint(destinationIp, TcpPortNumber);
             var client = new Client
             {
                 ClientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp)
@@ -83,53 +121,10 @@ namespace DistributedProxy.Application
             Connections.Add(client);
         }
 
-        internal void SendNewHostSignal()
-        {
-            try
-            {
-                var endPoint = new IPEndPoint(IPAddress.Broadcast, PortNumber);
-                var message = new Message {Type = MessageType.NewHost, Content = GetLocalIpAddress()};
-                var bytes = SerializationHelper.ObjectToByteArray(message);
-                UdpSocket.SendTo(bytes, endPoint);
-            }
-            catch (SocketException)
-            {
-            }
-        }
-
         private static string GetLocalIpAddress()
         {
             var iPHost = Dns.GetHostEntry(Dns.GetHostName());
             return (from iP in iPHost.AddressList where iP.AddressFamily == AddressFamily.InterNetwork select iP.ToString()).FirstOrDefault();
-        }
-
-        internal void SetupTcp()
-        {
-            try
-            {
-                ListenSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp)
-                {
-                    Blocking = false
-                };
-            }
-            catch (SocketException)
-            {
-            }
-            IpTcpEndPoint = new IPEndPoint(IPAddress.Any, PortNumber);
-            ListenSocket.Bind(IpTcpEndPoint);
-            ListenSocket.Listen(10);
-        }
-
-        internal void SetupUdp()
-        {
-            try
-            {
-                UdpSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-                UdpSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.Broadcast, 1);
-            }
-            catch (SocketException)
-            {
-            }
         }
     }
 }
