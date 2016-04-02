@@ -21,6 +21,7 @@ namespace DistributedProxy.Application
 
         internal void AcceptNewHosts()
         {
+            new Task(CheckForNewHostsSignal, TaskCreationOptions.LongRunning).Start();
             while (IsCheckingForNewHosts)
             {
                     try
@@ -38,18 +39,20 @@ namespace DistributedProxy.Application
                     {
                         // ignored
                     }
-                new Task(CheckForNewHostsSignal).Start();
             }
         }
 
         private static void CheckForNewHostsSignal()
         {
+            while (IsCheckingForNewHosts)
+            {
                 EndPoint localEndPoint = IpTcpEndPoint;
                 var receiveBuffer = new byte[1024];
                 var receiveByteCount = UdpSocket.ReceiveFrom(receiveBuffer, ref localEndPoint);
-                if (0 >= receiveByteCount) return;
-                var message = (Message)SerializationHelper.ByteArrayToObject(receiveBuffer);
+                if (0 >= receiveByteCount) continue;
+                var message = (Message) SerializationHelper.ByteArrayToObject(receiveBuffer);
                 DealWithMessage(message);
+            }
         }
 
         private static void DealWithMessage(Message message)
