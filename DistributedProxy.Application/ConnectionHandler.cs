@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading.Tasks;
 using DistributedProxy.Application.Model;
 using DistributedProxy.Application.Model.Enum;
 using DistributedProxy.Application.Utilities;
@@ -22,7 +23,6 @@ namespace DistributedProxy.Application
         {
             while (IsCheckingForNewHosts)
             {
-                {
                     try
                     {
                         // Will 'catch' if NO connection was pending, so statements below only occur when a connection is pending
@@ -40,11 +40,11 @@ namespace DistributedProxy.Application
                     {
                         // ignored
                     }
-                }
+                new Task(CheckForNewHostsSignal).Start();
             }
         }
 
-        internal void CheckForNewHostsSignal()
+        private static void CheckForNewHostsSignal()
         {
             while (IsCheckingForNewHosts)
             {
