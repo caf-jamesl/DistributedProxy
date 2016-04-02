@@ -3,6 +3,7 @@ using System.Runtime.InteropServices;
 using Microsoft.Win32;
 using System.IO;
 using System.Configuration;
+using System.Xml.Linq;
 // ReSharper disable NotAccessedField.Local
 
 namespace DistributedProxy.Application
@@ -19,7 +20,8 @@ namespace DistributedProxy.Application
         {
             if(!File.Exists(ConfigurationManager.AppSettings["xmlDocumentLocation"]))
             {
-                File.Create(ConfigurationManager.AppSettings["xmlDocumentLocation"]).Dispose();
+                Directory.CreateDirectory(@"C:\proxy\cache");
+                new XDocument(new XElement("Resources")).Save(ConfigurationManager.AppSettings["xmlDocumentLocation"]);
             }
             var registry = Registry.CurrentUser.OpenSubKey("Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings", true);
             if (registry == null) return;

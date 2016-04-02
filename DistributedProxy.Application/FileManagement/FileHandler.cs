@@ -10,7 +10,7 @@ namespace DistributedProxy.Application.FileManagement
         {
             stream.Position = 0;
             var filename = Guid.NewGuid();
-            var fileLocation = $@"C:\cache\{filename}";
+            var fileLocation = $@"C:\proxy\cache\{filename}";
             using (var fileStream = new FileStream(fileLocation, FileMode.OpenOrCreate, FileAccess.ReadWrite))
             {
                 stream.CopyTo(fileStream);
