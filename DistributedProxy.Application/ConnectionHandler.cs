@@ -25,7 +25,6 @@ namespace DistributedProxy.Application
             {
                     try
                     {
-                        // Will 'catch' if NO connection was pending, so statements below only occur when a connection is pending
                         var clientSocket = ListenSocket.Accept();
                         clientSocket.Blocking = false;
                         var client = new Client
@@ -34,7 +33,6 @@ namespace DistributedProxy.Application
                             InUse = true
                         };
                         Connections.Add(client);
-                        // Let new client know current people in room
                     }
                     catch (Exception)
                     {
@@ -46,15 +44,12 @@ namespace DistributedProxy.Application
 
         private static void CheckForNewHostsSignal()
         {
-            while (IsCheckingForNewHosts)
-            {
                 EndPoint localEndPoint = IpTcpEndPoint;
                 var receiveBuffer = new byte[1024];
                 var receiveByteCount = UdpSocket.ReceiveFrom(receiveBuffer, ref localEndPoint);
-                if (0 >= receiveByteCount) continue;
+                if (0 >= receiveByteCount) return;
                 var message = (Message)SerializationHelper.ByteArrayToObject(receiveBuffer);
                 DealWithMessage(message);
-            }
         }
 
         private static void DealWithMessage(Message message)
