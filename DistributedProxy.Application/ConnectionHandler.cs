@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
+using DistributedProxy.Application.FileManagement;
 using DistributedProxy.Application.Model;
 using DistributedProxy.Application.Model.Enum;
 using DistributedProxy.Application.Utilities;
@@ -13,6 +14,7 @@ namespace DistributedProxy.Application
     internal class ConnectionHandler
     {
         public static bool IsCheckingForNewHosts { get; set; }
+        public static string IpAddress = GetLocalIpAddress();
         private static bool IsCheckingForMessages { get; } = true;
         private const int TcpPortNumber = 8044;
         private const int UdpPortNumber = 8045;
@@ -74,7 +76,7 @@ namespace DistributedProxy.Application
             try
             {
                 var endPoint = new IPEndPoint(IPAddress.Broadcast, UdpPortNumber);
-                var message = new Message { Type = MessageType.NewHost, Content = GetLocalIpAddress() };
+                var message = new Message { Type = MessageType.NewHost, Content = IpAddress };
                 var bytes = SerializationHelper.ObjectToByteArray(message);
                 UdpSocket.SendTo(bytes, endPoint);
                 DoAzureHack();
@@ -86,7 +88,7 @@ namespace DistributedProxy.Application
 
         internal static void SendHostLeave()
         {
-            var message = new Message { Type = MessageType.HostLeave, Content = GetLocalIpAddress() };
+            var message = new Message { Type = MessageType.HostLeave, Content = IpAddress };
             var bytes = SerializationHelper.ObjectToByteArray(message);
             lock (ConnectionLock)
             {
@@ -95,6 +97,12 @@ namespace DistributedProxy.Application
                     client.ClientSocket.Send(bytes);
                 }
             }
+        }
+
+        private static string GetLocalIpAddress()
+        {
+            var iPHost = Dns.GetHostEntry(Dns.GetHostName());
+            return (from iP in iPHost.AddressList where iP.AddressFamily == AddressFamily.InterNetwork select iP.ToString()).FirstOrDefault();
         }
 
         private static void CheckForNewHostsSignal()
@@ -110,9 +118,9 @@ namespace DistributedProxy.Application
                     var message = (Message)SerializationHelper.ByteArrayToObject(receiveBuffer);
                     DealWithMessage(message);
                 }
-                catch
+                catch(Exception ex)
                 {
-                    // ignored
+                    Console.WriteLine(ex);
                 }
             }
         }
@@ -151,12 +159,30 @@ namespace DistributedProxy.Application
             {
                 case MessageType.NewHost:
                     TcpConnect(message.Content);
+                    SendCacheList(message.Content);
                     break;
                 case MessageType.HostLeave:
                     RemoveHost(message.Content);
                     break;
+                case MessageType.CacheList:
+                    break;
                 default:
                     throw new ArgumentOutOfRangeException();
+            }
+        }
+
+        private static void SendCacheList(string ipAddress)
+        {
+            if (ipAddress == IpAddress)
+            {
+                return;
+            }
+            var message = new XmlMessage { Type = MessageType.CacheList, Content = XmlRecordFile.Instance.GetLocalCachedItems() };
+            var bytes = SerializationHelper.ObjectToByteArray(message);
+            lock (Connections)
+            {
+                var client = Connections.First(ip => ip.Ip == ipAddress);
+                client.ClientSocket.Send(bytes);
             }
         }
 
@@ -165,11 +191,11 @@ namespace DistributedProxy.Application
             try
             {
                 IPAddress ip = null;
-                if (GetLocalIpAddress() == "10.0.0.4")
+                if (IpAddress == "10.0.0.4")
                 {
                     ip = IPAddress.Parse("10.0.0.5");
                 }
-                if (GetLocalIpAddress() == "10.0.0.5")
+                if (IpAddress == "10.0.0.5")
                 {
                     ip = IPAddress.Parse("10.0.0.4");
                 }
@@ -178,7 +204,7 @@ namespace DistributedProxy.Application
                     return;
                 }
                 var endPoint = new IPEndPoint(ip, UdpPortNumber);
-                var message = new Message { Type = MessageType.NewHost, Content = GetLocalIpAddress() };
+                var message = new Message { Type = MessageType.NewHost, Content = IpAddress };
                 var bytes = SerializationHelper.ObjectToByteArray(message);
                 UdpSocket.SendTo(bytes, endPoint);
             }
@@ -200,7 +226,7 @@ namespace DistributedProxy.Application
 
         private static void TcpConnect(string iP)
         {
-            if (iP == GetLocalIpAddress())
+            if (iP == IpAddress)
             {
                 return;
             }
@@ -223,12 +249,6 @@ namespace DistributedProxy.Application
             {
                 Console.WriteLine(ex);
             }
-        }
-
-        private static string GetLocalIpAddress()
-        {
-            var iPHost = Dns.GetHostEntry(Dns.GetHostName());
-            return (from iP in iPHost.AddressList where iP.AddressFamily == AddressFamily.InterNetwork select iP.ToString()).FirstOrDefault();
         }
     }
 }

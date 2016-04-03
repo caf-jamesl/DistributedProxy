@@ -42,5 +42,10 @@ namespace DistributedProxy.Form
             installHandler.Uninstall();
             Environment.Exit(Environment.ExitCode);
         }
+
+        private void clrCacheBtn_Click(object sender, EventArgs e)
+        {
+
+        }
     }
 }

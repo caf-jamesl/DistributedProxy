@@ -31,6 +31,7 @@
             this.proxyToggleBtn = new System.Windows.Forms.Button();
             this.runProxyLbl = new System.Windows.Forms.Label();
             this.exitBtn = new System.Windows.Forms.Button();
+            this.clrCacheBtn = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // proxyToggleBtn
@@ -64,6 +65,16 @@
             this.exitBtn.UseVisualStyleBackColor = true;
             this.exitBtn.Click += new System.EventHandler(this.exitBtn_Click);
             // 
+            // clrCacheBtn
+            // 
+            this.clrCacheBtn.Location = new System.Drawing.Point(12, 226);
+            this.clrCacheBtn.Name = "clrCacheBtn";
+            this.clrCacheBtn.Size = new System.Drawing.Size(75, 23);
+            this.clrCacheBtn.TabIndex = 3;
+            this.clrCacheBtn.Text = "Clear Cache";
+            this.clrCacheBtn.UseVisualStyleBackColor = true;
+            this.clrCacheBtn.Click += new System.EventHandler(this.clrCacheBtn_Click);
+            // 
             // Main
             // 
             this.AcceptButton = this.proxyToggleBtn;
@@ -72,11 +83,12 @@
             this.CancelButton = this.exitBtn;
             this.ClientSize = new System.Drawing.Size(284, 261);
             this.ControlBox = false;
+            this.Controls.Add(this.clrCacheBtn);
             this.Controls.Add(this.exitBtn);
             this.Controls.Add(this.runProxyLbl);
             this.Controls.Add(this.proxyToggleBtn);
             this.Name = "Main";
-            this.Text = "Form1";
+            this.Text = "Proxy";
             this.Load += new System.EventHandler(this.Main_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -88,6 +100,7 @@
         private System.Windows.Forms.Button proxyToggleBtn;
         private System.Windows.Forms.Label runProxyLbl;
         private System.Windows.Forms.Button exitBtn;
+        private System.Windows.Forms.Button clrCacheBtn;
     }
 }
 
