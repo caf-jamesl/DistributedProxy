@@ -63,7 +63,7 @@ namespace DistributedProxy.Application.FileManagement
                 var xmlDocumentLocation = ConfigurationManager.AppSettings["xmlDocumentLocation"];
                 var document = XDocument.Load(xmlDocumentLocation);
                 var elements = from resource in document.Descendants("Resource")
-                               where (string)resource.Element("Address") == ConnectionHandler.IpAddress
+                               where (string)resource.Element("Machine") == ConnectionHandler.IpAddress
                                select resource;
                 return elements.Select(element => element.ToString()).ToList();
             }
