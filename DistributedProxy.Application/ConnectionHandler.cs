@@ -144,9 +144,9 @@ namespace DistributedProxy.Application
                                 new Task(() => DealWithMessage(message)).Start();
                             }
                         }
-                        catch
+                        catch(Exception ex)
                         {
-                            // ignored
+                            Console.WriteLine(ex);
                         }
                     }
                 }
