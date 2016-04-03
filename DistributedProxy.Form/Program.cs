@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using DistributedProxy.Application;
 
 namespace DistributedProxy.Form
@@ -11,7 +12,7 @@ namespace DistributedProxy.Form
         [STAThread]
         private static void Main()
         {
-            StartupHandler.Start();
+            new Task(StartupHandler.Start).Start();
             System.Windows.Forms.Application.EnableVisualStyles();
             System.Windows.Forms.Application.SetCompatibleTextRenderingDefault(false);
             System.Windows.Forms.Application.Run(new Main());

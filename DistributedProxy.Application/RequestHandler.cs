@@ -1,8 +1,6 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.Net;
 using System.Threading.Tasks;
-using System.Web.Caching;
 using DistributedProxy.Application.FileManagement;
 
 namespace DistributedProxy.Application
@@ -61,7 +59,14 @@ namespace DistributedProxy.Application
                     newStream.Position = 0;
                     using (var outputStream = Context.Response.OutputStream)
                     {
-                        newStream.CopyTo(outputStream);
+                        try
+                        {
+                            newStream.CopyTo(outputStream);
+                        }
+                        catch
+                        {
+                            // ignored
+                        }
                     }
                 }
             }
