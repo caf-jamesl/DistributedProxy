@@ -1,9 +1,9 @@
 ﻿
 namespace DistributedProxy.Application
 {
-    public class StartupHandler
+    public static class StartupHandler
     {
-        public StartupHandler()
+        public static void Start()
         {
             var connectionHandler = new ConnectionHandler();
             connectionHandler.SetupTcp();

@@ -11,17 +11,10 @@ namespace DistributedProxy.Form
         [STAThread]
         private static void Main()
         {
-            new StartupHandler();
-            AppDomain.CurrentDomain.ProcessExit += OnProcessExit;
+            StartupHandler.Start();
             System.Windows.Forms.Application.EnableVisualStyles();
             System.Windows.Forms.Application.SetCompatibleTextRenderingDefault(false);
             System.Windows.Forms.Application.Run(new Main());
-        }
-
-        private static void OnProcessExit(object sender, EventArgs e)
-        {
-            var installHandler = new InstallHandler();
-            installHandler.Uninstall(); 
         }
     }
 }

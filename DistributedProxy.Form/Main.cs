@@ -40,6 +40,7 @@ namespace DistributedProxy.Form
         {
             var installHandler = new InstallHandler();
             installHandler.Uninstall();
+            Environment.Exit(Environment.ExitCode);
         }
     }
 }
