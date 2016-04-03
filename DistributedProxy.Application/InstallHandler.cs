@@ -40,6 +40,7 @@ namespace DistributedProxy.Application
             InternetSetOption(IntPtr.Zero, INTERNET_OPTION_SETTINGS_CHANGED, IntPtr.Zero, 0);
             InternetSetOption(IntPtr.Zero, INTERNET_OPTION_REFRESH, IntPtr.Zero, 0);
             registry.Close();
+            ConnectionHandler.SendHostLeave();
         }
     }
 }
