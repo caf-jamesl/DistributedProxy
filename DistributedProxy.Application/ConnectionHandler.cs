@@ -165,6 +165,7 @@ namespace DistributedProxy.Application
                     RemoveHost(message.StringContent);
                     break;
                 case MessageType.CacheList:
+                    XmlRecordFile.Instance.AddToCacheListFromRemote(message.ListStringContent);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();

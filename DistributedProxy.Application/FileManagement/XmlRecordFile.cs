@@ -68,5 +68,16 @@ namespace DistributedProxy.Application.FileManagement
                 return elements.Select(element => element.ToString()).ToList();
             }
         }
+
+        public void AddToCacheListFromRemote(List<string> elements)
+        { 
+            var xElements = elements.Select(XElement.Parse).ToList();
+            lock (Padlock)
+            {
+                var xmlDocumentLocation = ConfigurationManager.AppSettings["xmlDocumentLocation"];
+                var document = XDocument.Load(xmlDocumentLocation);
+                document.Add(xElements);
+            }
+        }
     }
 }
