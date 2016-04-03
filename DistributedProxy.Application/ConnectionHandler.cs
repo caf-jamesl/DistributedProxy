@@ -163,6 +163,7 @@ namespace DistributedProxy.Application
                     break;
                 case MessageType.HostLeave:
                     RemoveHost(message.StringContent);
+                    XmlRecordFile.Instance.RemoveCacheListFromRemote(message.StringContent);
                     break;
                 case MessageType.CacheList:
                     XmlRecordFile.Instance.AddToCacheListFromRemote(message.ListStringContent);

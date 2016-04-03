@@ -92,5 +92,20 @@ namespace DistributedProxy.Application.FileManagement
                 document.Save(xmlDocumentLocation);
             }
         }
+
+        public void RemoveCacheListFromRemote(string ip)
+        {
+            lock (Padlock)
+            {
+                var xmlDocumentLocation = ConfigurationManager.AppSettings["xmlDocumentLocation"];
+                var document = XDocument.Load(xmlDocumentLocation);
+                foreach (var element in document.Descendants("Resource").Where(element => element.Element("Machine")?.Value == ip))
+                {
+                    element.Remove();
+                }
+                document.RemoveNodes();
+                document.Save(xmlDocumentLocation);
+            }
+        }
     }
 }
