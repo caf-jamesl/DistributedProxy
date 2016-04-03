@@ -65,7 +65,16 @@ namespace DistributedProxy.Application.FileManagement
                 var elements = from resource in document.Descendants("Resource")
                                where (string)resource.Element("Machine") == ConnectionHandler.IpAddress
                                select resource;
-                return elements.Select(element => element.ToString()).ToList();
+                var xElements = elements as IList<XElement> ?? elements.ToList();
+                foreach (var element in xElements)
+                {
+                    var location = element.Element("Location")?.Value;
+                    var networkedLocation = location?.Replace(@"C:", @"\\" + ConnectionHandler.IpAddress + @"\c$");
+                    var xElement = element.Element("Location");
+                    if (xElement == null) continue;
+                    if (networkedLocation != null) xElement.Value = networkedLocation;
+                }
+                return xElements.Select(element => element.ToString()).ToList();
             }
         }
 
@@ -76,7 +85,11 @@ namespace DistributedProxy.Application.FileManagement
             {
                 var xmlDocumentLocation = ConfigurationManager.AppSettings["xmlDocumentLocation"];
                 var document = XDocument.Load(xmlDocumentLocation);
-                document.Add(xElements);
+                foreach (var xElement in xElements)
+                {
+                    document.Root?.Add(xElement);
+                }
+                document.Save(xmlDocumentLocation);
             }
         }
     }

@@ -134,7 +134,7 @@ namespace DistributedProxy.Application
                     foreach (var client in Connections)
                     {
                         var localEndPoint = (EndPoint)IpTcpEndPoint;
-                        var receiveBuffer = new byte[1024];
+                        var receiveBuffer = new byte[20480];
                         try
                         {
                             var receiveByteCount = client.ClientSocket.ReceiveFrom(receiveBuffer, ref localEndPoint);
