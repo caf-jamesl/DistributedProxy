@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using Microsoft.Win32;
-using System.IO;
-using System.Configuration;
-using System.Xml.Linq;
 
 
 namespace DistributedProxy.Application
@@ -17,11 +14,6 @@ namespace DistributedProxy.Application
 
         public void Install()
         {
-            if(!File.Exists(ConfigurationManager.AppSettings["xmlDocumentLocation"]))
-            {
-                Directory.CreateDirectory(@"C:\proxy\cache");
-                new XDocument(new XElement("Resources")).Save(ConfigurationManager.AppSettings["xmlDocumentLocation"]);
-            }
             var registry = Registry.CurrentUser.OpenSubKey("Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings", true);
             if (registry == null) return;
             registry.SetValue("ProxyEnable", 1);
