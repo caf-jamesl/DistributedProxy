@@ -39,7 +39,10 @@ namespace DistributedProxy.Application
                     {
                         ClientSocket = clientSocket
                     };
-                    Connections.Add(client);
+                    lock (ConnectionLock)
+                    {
+                        Connections.Add(client);
+                    }
                 }
                 catch (Exception)
                 {
@@ -85,9 +88,12 @@ namespace DistributedProxy.Application
         {
             var message = new Message { Type = MessageType.HostLeave, Content = GetLocalIpAddress() };
             var bytes = SerializationHelper.ObjectToByteArray(message);
-            foreach (var client in Connections)
+            lock (ConnectionLock)
             {
-                client.ClientSocket.Send(bytes);
+                foreach (var client in Connections)
+                {
+                    client.ClientSocket.Send(bytes);
+                }
             }
         }
 
@@ -183,10 +189,11 @@ namespace DistributedProxy.Application
 
         internal static void RemoveHost(string message)
         {
-            var host =  Connections.First(client => client.Ip == message);
-            host.ClientSocket.Close();
+            if (Connections == null) return;
             lock (ConnectionLock)
             {
+                var host = Connections.First(client => client.Ip == message);
+                host.ClientSocket.Close();
                 Connections.Remove(host);
             }
         }
@@ -201,12 +208,16 @@ namespace DistributedProxy.Application
             var endPoint = new IPEndPoint(destinationIp, TcpPortNumber);
             var client = new Client
             {
-                ClientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp)
+                ClientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp),
+                Ip = iP
             };
             try
             {
                 client.ClientSocket.Connect(endPoint);
-                Connections.Add(client);
+                lock (ConnectionLock)
+                {
+                    Connections.Add(client);
+                }
             }
             catch (Exception ex)
             {
