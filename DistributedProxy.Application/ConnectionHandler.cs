@@ -76,7 +76,7 @@ namespace DistributedProxy.Application
             try
             {
                 var endPoint = new IPEndPoint(IPAddress.Broadcast, UdpPortNumber);
-                var message = new Message { Type = MessageType.NewHost, Content = IpAddress };
+                var message = new Message { Type = MessageType.NewHost, StringContent = IpAddress };
                 var bytes = SerializationHelper.ObjectToByteArray(message);
                 UdpSocket.SendTo(bytes, endPoint);
                 DoAzureHack();
@@ -88,7 +88,7 @@ namespace DistributedProxy.Application
 
         internal static void SendHostLeave()
         {
-            var message = new Message { Type = MessageType.HostLeave, Content = IpAddress };
+            var message = new Message { Type = MessageType.HostLeave, StringContent = IpAddress };
             var bytes = SerializationHelper.ObjectToByteArray(message);
             lock (ConnectionLock)
             {
@@ -158,11 +158,11 @@ namespace DistributedProxy.Application
             switch (message.Type)
             {
                 case MessageType.NewHost:
-                    TcpConnect(message.Content);
-                    SendCacheList(message.Content);
+                    TcpConnect(message.StringContent);
+                    SendCacheList(message.StringContent);
                     break;
                 case MessageType.HostLeave:
-                    RemoveHost(message.Content);
+                    RemoveHost(message.StringContent);
                     break;
                 case MessageType.CacheList:
                     break;
@@ -177,7 +177,7 @@ namespace DistributedProxy.Application
             {
                 return;
             }
-            var message = new XmlMessage { Type = MessageType.CacheList, Content = XmlRecordFile.Instance.GetLocalCachedItems() };
+            var message = new Message { Type = MessageType.CacheList, ListStringContent = XmlRecordFile.Instance.GetLocalCachedItems() };
             var bytes = SerializationHelper.ObjectToByteArray(message);
             lock (Connections)
             {
@@ -204,7 +204,7 @@ namespace DistributedProxy.Application
                     return;
                 }
                 var endPoint = new IPEndPoint(ip, UdpPortNumber);
-                var message = new Message { Type = MessageType.NewHost, Content = IpAddress };
+                var message = new Message { Type = MessageType.NewHost, StringContent = IpAddress };
                 var bytes = SerializationHelper.ObjectToByteArray(message);
                 UdpSocket.SendTo(bytes, endPoint);
             }

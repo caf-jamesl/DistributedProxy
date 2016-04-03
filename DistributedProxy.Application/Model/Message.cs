@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using DistributedProxy.Application.Model.Enum;
 
 namespace DistributedProxy.Application.Model
@@ -7,6 +8,7 @@ namespace DistributedProxy.Application.Model
     internal class Message
     {
         internal MessageType Type { get; set; }
-        internal string Content { get; set; }
+        internal string StringContent { get; set; }
+        internal List<string> ListStringContent { get; set; }
     }
 }
