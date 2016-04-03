@@ -24,7 +24,7 @@ namespace DistributedProxy.Application
         private static readonly IPEndPoint IpTcpEndPoint = new IPEndPoint(IPAddress.Any, TcpPortNumber);
         private static readonly IPEndPoint UdpEndPoint = new IPEndPoint(IPAddress.Any, UdpPortNumber);
         private static readonly List<Client> Connections = new List<Client>();
-
+        private static object connectionLock = new object();
         internal void AcceptNewHosts()
         {
             new Task(CheckForNewHostsSignal, TaskCreationOptions.LongRunning).Start();
@@ -115,22 +115,25 @@ namespace DistributedProxy.Application
         {
             while (IsCheckingForMessages)
             {
-                foreach (var client in Connections)
+                lock (connectionLock)
                 {
-                    var localEndPoint = (EndPoint) IpTcpEndPoint;
-                    var receiveBuffer = new byte[1024];
-                    try
+                    foreach (var client in Connections)
                     {
-                        var receiveByteCount = client.ClientSocket.ReceiveFrom(receiveBuffer, ref localEndPoint);
-                        if (0 < receiveByteCount)
+                        var localEndPoint = (EndPoint)IpTcpEndPoint;
+                        var receiveBuffer = new byte[1024];
+                        try
                         {
-                            var message = (Message) SerializationHelper.ByteArrayToObject(receiveBuffer);
-                            DealWithMessage(message);
+                            var receiveByteCount = client.ClientSocket.ReceiveFrom(receiveBuffer, ref localEndPoint);
+                            if (0 < receiveByteCount)
+                            {
+                                var message = (Message)SerializationHelper.ByteArrayToObject(receiveBuffer);
+                                DealWithMessage(message);
+                            }
                         }
-                    }
-                    catch
-                    {
-                        // ignored
+                        catch
+                        {
+                            // ignored
+                        }
                     }
                 }
             }
@@ -182,7 +185,10 @@ namespace DistributedProxy.Application
         {
             var host =  Connections.First(client => client.Ip == message);
             host.ClientSocket.Close();
-            Connections.Remove(host);
+            lock (connectionLock)
+            {
+                Connections.Remove(host);
+            }
         }
 
         private static void TcpConnect(string iP)
