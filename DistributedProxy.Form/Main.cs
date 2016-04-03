@@ -35,5 +35,11 @@ namespace DistributedProxy.Form
         {
 
         }
+
+        private void exitBtn_Click(object sender, EventArgs e)
+        {
+            var installHandler = new InstallHandler();
+            installHandler.Uninstall();
+        }
     }
 }

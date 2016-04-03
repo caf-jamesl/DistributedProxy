@@ -30,6 +30,7 @@
         {
             this.proxyToggleBtn = new System.Windows.Forms.Button();
             this.runProxyLbl = new System.Windows.Forms.Label();
+            this.exitBtn = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // proxyToggleBtn
@@ -39,7 +40,7 @@
             this.proxyToggleBtn.RightToLeft = System.Windows.Forms.RightToLeft.No;
             this.proxyToggleBtn.Size = new System.Drawing.Size(100, 23);
             this.proxyToggleBtn.TabIndex = 0;
-            this.proxyToggleBtn.Text = "Run Proxy";
+            this.proxyToggleBtn.Text = "Toggle Proxy";
             this.proxyToggleBtn.UseVisualStyleBackColor = true;
             this.proxyToggleBtn.Click += new System.EventHandler(this.proxyToggleBtn_Click);
             // 
@@ -52,11 +53,26 @@
             this.runProxyLbl.TabIndex = 1;
             this.runProxyLbl.Text = "Proxy not running";
             // 
+            // exitBtn
+            // 
+            this.exitBtn.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+            this.exitBtn.Location = new System.Drawing.Point(197, 226);
+            this.exitBtn.Name = "exitBtn";
+            this.exitBtn.Size = new System.Drawing.Size(75, 23);
+            this.exitBtn.TabIndex = 2;
+            this.exitBtn.Text = "Exit";
+            this.exitBtn.UseVisualStyleBackColor = true;
+            this.exitBtn.Click += new System.EventHandler(this.exitBtn_Click);
+            // 
             // Main
             // 
+            this.AcceptButton = this.proxyToggleBtn;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.CancelButton = this.exitBtn;
             this.ClientSize = new System.Drawing.Size(284, 261);
+            this.ControlBox = false;
+            this.Controls.Add(this.exitBtn);
             this.Controls.Add(this.runProxyLbl);
             this.Controls.Add(this.proxyToggleBtn);
             this.Name = "Main";
@@ -71,6 +87,7 @@
 
         private System.Windows.Forms.Button proxyToggleBtn;
         private System.Windows.Forms.Label runProxyLbl;
+        private System.Windows.Forms.Button exitBtn;
     }
 }
 
