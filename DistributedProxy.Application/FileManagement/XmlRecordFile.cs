@@ -24,7 +24,7 @@ namespace DistributedProxy.Application.FileManagement
             }
         }
 
-        internal void SaveCachedFileRecord(string address, string filename)
+        internal void SaveCachedFileRecord(string address, string filename, string machine)
         {
             lock (Padlock)
             {
@@ -33,7 +33,8 @@ namespace DistributedProxy.Application.FileManagement
                 var resource =
                     new XElement("Resource",
                         new XElement("Address", address),
-                        new XElement("Location", filename)
+                        new XElement("Location", filename),
+                        new XElement("Machine", machine)
                         );
                 document.Root?.Add(resource);
                 document.Save(xmlDocumentLocation);

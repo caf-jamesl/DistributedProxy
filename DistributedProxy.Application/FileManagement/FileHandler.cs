@@ -16,7 +16,7 @@ namespace DistributedProxy.Application.FileManagement
                 stream.CopyTo(fileStream);
             }
             stream.Close();
-            XmlRecordFile.Instance.SaveCachedFileRecord(webRequest.RequestUri.AbsoluteUri, fileLocation);
+            XmlRecordFile.Instance.SaveCachedFileRecord(webRequest.RequestUri.AbsoluteUri, fileLocation, "local");
         }
     }
 }
