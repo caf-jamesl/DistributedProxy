@@ -40,6 +40,7 @@ namespace DistributedProxy.Application
                     var client = new Client
                     {
                         ClientSocket = clientSocket,
+                        Ip = ((IPEndPoint)clientSocket.RemoteEndPoint).Address.ToString()
                     };
                     lock (ConnectionLock)
                     {
@@ -118,7 +119,7 @@ namespace DistributedProxy.Application
                     var message = (Message)SerializationHelper.ByteArrayToObject(receiveBuffer);
                     DealWithMessage(message);
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     Console.WriteLine(ex);
                 }
@@ -144,7 +145,7 @@ namespace DistributedProxy.Application
                                 new Task(() => DealWithMessage(message)).Start();
                             }
                         }
-                        catch(Exception ex)
+                        catch (Exception ex)
                         {
                             Console.WriteLine(ex);
                         }
