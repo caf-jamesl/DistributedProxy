@@ -97,6 +97,7 @@ namespace DistributedProxy.Application
                 foreach (var client in Connections)
                 {
                     client.ClientSocket.Send(bytes);
+                    XmlRecordFile.Instance.RemoveCacheListFromRemote(client.Ip);
                 }
             }
         }
