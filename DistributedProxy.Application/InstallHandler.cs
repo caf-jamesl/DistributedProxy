@@ -14,24 +14,26 @@ namespace DistributedProxy.Application
 
         public void Install()
         {
-            var registry = Registry.CurrentUser.OpenSubKey("Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings", true);
-            if (registry == null) return;
-            registry.SetValue("ProxyEnable", 1);
-            registry.SetValue("ProxyServer", "127.0.0.1:7777");
-            InternetSetOption(IntPtr.Zero, INTERNET_OPTION_SETTINGS_CHANGED, IntPtr.Zero, 0);
-            InternetSetOption(IntPtr.Zero, INTERNET_OPTION_REFRESH, IntPtr.Zero, 0);
-            registry.Close();
+            using (var registry = Registry.CurrentUser.OpenSubKey("Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings", true))
+            {
+                if (registry == null) return;
+                registry.SetValue("ProxyEnable", 1);
+                registry.SetValue("ProxyServer", "127.0.0.1:7777");
+                InternetSetOption(IntPtr.Zero, INTERNET_OPTION_SETTINGS_CHANGED, IntPtr.Zero, 0);
+                InternetSetOption(IntPtr.Zero, INTERNET_OPTION_REFRESH, IntPtr.Zero, 0);
+            }
         }
 
         public void Uninstall()
         {
-            var registry = Registry.CurrentUser.OpenSubKey("Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings", true);
-            if (registry == null) return;
-            registry.SetValue("ProxyEnable", 0);
-            registry.SetValue("ProxyServer", "127.0.0.1:7777");
-            InternetSetOption(IntPtr.Zero, INTERNET_OPTION_SETTINGS_CHANGED, IntPtr.Zero, 0);
-            InternetSetOption(IntPtr.Zero, INTERNET_OPTION_REFRESH, IntPtr.Zero, 0);
-            registry.Close();
+            using (var registry = Registry.CurrentUser.OpenSubKey("Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings", true))
+            {
+                if (registry == null) return;
+                registry.SetValue("ProxyEnable", 0);
+                registry.SetValue("ProxyServer", "127.0.0.1:7777");
+                InternetSetOption(IntPtr.Zero, INTERNET_OPTION_SETTINGS_CHANGED, IntPtr.Zero, 0);
+                InternetSetOption(IntPtr.Zero, INTERNET_OPTION_REFRESH, IntPtr.Zero, 0);
+            }
             ConnectionHandler.SendHostLeave();
         }
     }
