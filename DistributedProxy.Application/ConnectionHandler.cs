@@ -39,7 +39,7 @@ namespace DistributedProxy.Application
                     clientSocket.Blocking = false;
                     var client = new Client
                     {
-                        ClientSocket = clientSocket
+                        ClientSocket = clientSocket,
                     };
                     lock (ConnectionLock)
                     {
@@ -242,6 +242,7 @@ namespace DistributedProxy.Application
             try
             {
                 client.ClientSocket.Connect(endPoint);
+                client.ClientSocket.Blocking = false;
                 lock (ConnectionLock)
                 {
                     Connections.Add(client);
