@@ -103,7 +103,6 @@ namespace DistributedProxy.Application.FileManagement
                 {
                     element.Remove();
                 }
-                document.RemoveNodes();
                 document.Save(xmlDocumentLocation);
             }
         }
