@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Windows;
 using DistributedProxy.Application;
 using DistributedProxy.Application.FileManagement;
 
@@ -48,6 +49,7 @@ namespace DistributedProxy.Form
         {
             XmlRecordFile.Instance.ClearFile();
             FileHandler.ClearFiles();
+            MessageBox.Show("Cache Cleared");
         }
     }
 }
