@@ -17,10 +17,6 @@ namespace DistributedProxy.Application
 
         internal void HandleRequest()
         {
-            if (Context.Request.IsSecureConnection)
-            {
-            return;    
-            }
             var location = XmlRecordFile.Instance.CheckForCachedFile(Context.Request.RawUrl);
             if (location != null)
             {
