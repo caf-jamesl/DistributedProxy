@@ -107,5 +107,16 @@ namespace DistributedProxy.Application.FileManagement
                 document.Save(xmlDocumentLocation);
             }
         }
+
+        public void ClearFile()
+        {
+            lock (Padlock)
+            {
+                var xmlDocumentLocation = ConfigurationManager.AppSettings["xmlDocumentLocation"];
+                var document = XDocument.Load(xmlDocumentLocation);
+                document.Root?.RemoveAll();
+                document.Save(xmlDocumentLocation);
+            }
+        }
     }
 }

@@ -4,7 +4,7 @@ using System.Net;
 
 namespace DistributedProxy.Application.FileManagement
 {
-    internal class FileHandler
+    public class FileHandler
     {
         internal void SaveCachedFile(Stream stream, WebRequest webRequest)
         {
@@ -17,6 +17,15 @@ namespace DistributedProxy.Application.FileManagement
             }
             stream.Close();
             XmlRecordFile.Instance.SaveCachedFileRecord(webRequest.RequestUri.AbsoluteUri, fileLocation, ConnectionHandler.IpAddress);
+        }
+
+        public static void ClearFiles()
+        {
+            var di = new DirectoryInfo(@"C:\proxy\cache\");
+            foreach (var file in di.GetFiles())
+            {
+                file.Delete();
+            }
         }
     }
 }
