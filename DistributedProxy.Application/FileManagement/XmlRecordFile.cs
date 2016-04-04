@@ -99,9 +99,10 @@ namespace DistributedProxy.Application.FileManagement
             {
                 var xmlDocumentLocation = ConfigurationManager.AppSettings["xmlDocumentLocation"];
                 var document = XDocument.Load(xmlDocumentLocation);
-                foreach (var element in document.Descendants("Resource").Where(element => element.Element("Machine")?.Value == ip))
+                var resources = document.Descendants("Resource").Where(element => element.Element("Machine")?.Value == ip).ToList();
+                foreach (var element in resources)
                 {
-                    element.Remove();
+                        element.Remove();
                 }
                 document.Save(xmlDocumentLocation);
             }

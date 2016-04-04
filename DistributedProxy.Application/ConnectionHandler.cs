@@ -46,6 +46,7 @@ namespace DistributedProxy.Application
                     {
                         Connections.Add(client);
                     }
+                    new Task(() => SendCacheList(client.Ip)).Start();
                 }
                 catch (Exception)
                 {
