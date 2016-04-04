@@ -39,6 +39,14 @@ namespace DistributedProxy.Application.FileManagement
                         );
                 document.Root?.Add(resource);
                 document.Save(xmlDocumentLocation);
+
+                var location = resource.Element("Location")?.Value;
+                var xElement = resource.Element("Location");
+                if (xElement != null)
+                    if (location != null)
+                        xElement.Value = location.Replace(@"C:", @"\\" + ConnectionHandler.IpAddress + @"\c$");
+                var list = new List<string> { resource.ToString() };
+                ConnectionHandler.SendNewCacheUpdate(list);
             }
         }
 
@@ -79,7 +87,7 @@ namespace DistributedProxy.Application.FileManagement
         }
 
         public void AddToCacheListFromRemote(List<string> elements)
-        { 
+        {
             var xElements = elements.Select(XElement.Parse).ToList();
             lock (Padlock)
             {
@@ -102,7 +110,7 @@ namespace DistributedProxy.Application.FileManagement
                 var resources = document.Descendants("Resource").Where(element => element.Element("Machine")?.Value == ip).ToList();
                 foreach (var element in resources)
                 {
-                        element.Remove();
+                    element.Remove();
                 }
                 document.Save(xmlDocumentLocation);
             }

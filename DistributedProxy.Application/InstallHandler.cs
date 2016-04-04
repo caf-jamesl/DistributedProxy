@@ -24,7 +24,7 @@ namespace DistributedProxy.Application
             }
         }
 
-        public void Uninstall()
+        public void Uninstall(bool onlyToggle)
         {
             using (var registry = Registry.CurrentUser.OpenSubKey("Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings", true))
             {
@@ -34,6 +34,7 @@ namespace DistributedProxy.Application
                 InternetSetOption(IntPtr.Zero, INTERNET_OPTION_SETTINGS_CHANGED, IntPtr.Zero, 0);
                 InternetSetOption(IntPtr.Zero, INTERNET_OPTION_REFRESH, IntPtr.Zero, 0);
             }
+            if (onlyToggle) return;
             ConnectionHandler.SendHostLeave();
         }
     }

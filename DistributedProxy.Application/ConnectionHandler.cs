@@ -102,6 +102,19 @@ namespace DistributedProxy.Application
             }
         }
 
+        internal static void SendNewCacheUpdate(List<string> newElement)
+        {
+            var message = new Message { Type = MessageType.CacheList, ListStringContent = newElement };
+            var bytes = SerializationHelper.ObjectToByteArray(message);
+            lock (ConnectionLock)
+            {
+                foreach (var client in Connections)
+                {
+                    client.ClientSocket.Send(bytes);
+                }
+            }
+        }
+
         private static string GetLocalIpAddress()
         {
             var iPHost = Dns.GetHostEntry(Dns.GetHostName());

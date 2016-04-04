@@ -20,7 +20,7 @@ namespace DistributedProxy.Form
             {
                 threadHandler.StopRequestThread();
                 proxy.Stop();
-                installHandler.Uninstall();
+                installHandler.Uninstall(true);
                 runProxyLbl.Text = @"Proxy not running";
             }
             else
@@ -40,7 +40,7 @@ namespace DistributedProxy.Form
         private void exitBtn_Click(object sender, EventArgs e)
         {
             var installHandler = new InstallHandler();
-            installHandler.Uninstall();
+            installHandler.Uninstall(false);
             Environment.Exit(Environment.ExitCode);
         }
 
